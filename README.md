@@ -1,9 +1,6 @@
-<h2>przetwarzanie_rozproszone</h2>
+# przetwarzanie_rozproszone
 
 commands:
-
-<ul>
-    <li>compilation: `mpicc hello_world.c -o hello`</li>
-    <li>running: `mpirun ./hello`</li>
-    <li>running with number of processes specified: `mpirun -np 4 ./hello`</li>
-</ul>
+- compilation: `mpicc hello_world.c -o hello`
+- running: `mpirun ./hello`
+- running with number of processes specified: `mpirun -np 4 ./hello`
