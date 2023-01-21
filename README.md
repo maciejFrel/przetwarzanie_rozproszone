@@ -2,8 +2,8 @@
 
 commands:
 
-compilation: `mpicc hello_world.c -o hello`
-
-running: `mpirun ./hello`
-
-running with number of processes specified: `mpirun -np 4 ./hello`
+<ul>
+    <li>compilation: `mpicc hello_world.c -o hello`</li>
+    <li>running: `mpirun ./hello`</li>
+    <li>running with number of processes specified: `mpirun -np 4 ./hello`</li>
+</ul>
