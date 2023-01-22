@@ -4,3 +4,4 @@ first/labnet
 *.out
 *.exe
 .vscode
+*.DS_Store
