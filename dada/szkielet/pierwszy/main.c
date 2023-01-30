@@ -56,6 +56,7 @@ int main(int argc, char **argv)
     inicjuj_typ_pakietu(); // tworzy typ pakietu
     packet_t pkt;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+    printf("fdsafdsafsad %d", size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     int ile_razy = 0;
@@ -73,10 +74,10 @@ int main(int argc, char **argv)
             printf("[%d] Wysyłam pakiet %d z %d (%d)\n", rank, ile_razy, pkt.data, ile_razy <= 4);
             MPI_Send( &pkt, 1, MPI_PAKIET_T, (rank+1)%size, APP_PKT, MPI_COMM_WORLD);
         } else if (rank!=ROOT)*/
-        {
-            printf("[%d] Wysyłam pakiet %d z %d\n", rank, ile_razy, pkt.data);
-            MPI_Send(&pkt, 1, MPI_PAKIET_T, (rank + 1) % size, APP_PKT, MPI_COMM_WORLD);
-        }
+        // {
+        printf("[%d] Wysyłam pakiet %d z %d\n", rank, ile_razy, pkt.data);
+        MPI_Send(&pkt, 1, MPI_PAKIET_T, (rank + 1) % size, APP_PKT, MPI_COMM_WORLD);
+        // }
         if (ile_razy > 4)
             break;
     }
