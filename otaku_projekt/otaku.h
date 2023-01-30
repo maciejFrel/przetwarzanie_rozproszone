@@ -16,6 +16,8 @@
 #define STATE_CHANGE_PROB 10
 
 #define S 3
+#define M 20
+#define X 200
 
 #define ROOT 0
 

@@ -1,50 +1,16 @@
 #include "otaku.h"
 #include "communication_thread.h"
 
-int maxFromPs(int *ps)
-{
-    int max = -1;
-    for (int i = 0; i < size; i++)
-    {
-        if (max < ps[i])
-        {
-            max = ps[i];
-        }
-    }
-    
-    return max;
-}
-
-int countGreaterOrEqual(int *ps, int value) {
-    int count = 0;
-    for (int i = 0; i < size; i++)
-    {
-        if (value >= ps[i])
-        {
-            count++;
-        }
-    }
-    
-    return count;
-} 
-
-void fillPs(int *ps, int value)
-{
-    for (int i = 0; i < size; i++)
-    {
-        ps[i] = value;
-    }
-}
-
 void *startCommunicationThread(void *ptr)
 {
-    int ps[8];
+    packet_t *otakuData = malloc(size * sizeof(packet_t)); // dane o pozostałych otaku
+
     for (int i = 0; i < size; i++)
     {
-        ps[i] = -1;
+        otakuData[i].p = -1;
     }
-    ps[rank] = 0;
-    // debug("p: %d", ps[0]);
+    otakuData[rank].p = 0;
+    // debug("p: %d", otakuData[0]);
 
     MPI_Status status;
     packet_t packet;
@@ -57,43 +23,74 @@ void *startCommunicationThread(void *ptr)
 
         switch (status.MPI_TAG)
         {
-            case Req:
-                debug("I got Req from %d", status.MPI_SOURCE);
-                packet_t *packet = malloc(sizeof(packet_t));
-                packet->m = m;
-                packet->p = p;
-                packet->x = x;
-                sendPacket(packet, status.MPI_SOURCE, Ack);
+        case Req:
+            {
+                // debug("I got REQ from %d", status.MPI_SOURCE);
+                packet_t *pkt = malloc(sizeof(packet_t));
+                pkt->m = m;
+                pkt->p = p;
+                pkt->x = x;
+                sendPacket(pkt, status.MPI_SOURCE, Ack);
                 break;
-            case Ack:
-                debug("p: %d", ps[0]);
-                debug("I got Ack from %d (m: %d, p: %d, x: %d)", status.MPI_SOURCE, packet->m, packet->p, packet->x);
-                ps[status.MPI_SOURCE] = packet->p;
-                break;
-            case Release:
-                debug("I got Release from %d", status.MPI_SOURCE);
-                m = 0;
-                break;
+            }
+        case Ack:
+            // debug("p: %d", otakuData[0].p);
+            // debug("I got ACK from %d (m: %d, p: %d, x: %d)", status.MPI_SOURCE, packet.m, packet.p, packet.x);
+            otakuData[status.MPI_SOURCE].m = packet.m;
+            otakuData[status.MPI_SOURCE].p = packet.p;
+            otakuData[status.MPI_SOURCE].x = packet.x;
+            break;
+        case Release:
+            // debug("I got RELEASE from %d", status.MPI_SOURCE);
+            x = 0;
+            break;
         }
 
-        // check if I hot all the ACKs i need
         int f = 1;
         for (int i = 0; i < size; i++)
         {
-            if (ps[i] == -1)
+            if (i != rank)
             {
-                f = 0;
-                break;
+                // debug("p %d", otakuData[i].p);
+                if (otakuData[i].p == -1)
+                {
+                    f = 0;
+                    break;
+                }
             }
         }
 
-        if (f)
+        if (f) // ACK otrzymane od wszystkich pozostałych otaku
         {
-            int a = countGreaterOrEqual(ps, p);
-            if (a < S) {
-                if ()
+            // debug("I got all ACK");
+            int a = countGreater(otakuData);
+            debug("number of otaku in the room: %d", a);
+            if (a < S) // sprawdzanie czy jest miejsce w pomieszczeniu
+            {
+                int b = countCuchyOfGreater(otakuData);
+                // debug("b %d", b);
+                if (b < M) // sprawdzanie czy nie przekroczymy M
+                {
+                    debug("---IN---");
+                    // wejście do pomieszczenia
+                    state = In;
+                    m += rand() % 3 + 1;
+                    p = maxFromPs(otakuData) + 1;
+                    // debug("p %d", p);
+                    int c = maxFromXs(otakuData);
+                    if (c + m > X) // sprawdzanie czy trzeba zawiadomić kolejnego przedstawiciela
+                    {
+                        for (int i = 0; i < size; i++)
+                        {
+                            if (i != rank)
+                            {
+                                sendPacket(0, i, Release); // zawiadomienie nowego przedstawiciela
+                            }
+                        }
+                    }
+                }
             }
-            fillPs(ps, -1);
+            fillPs(otakuData, -1); // wyzerowanie lokalnie przechowanych danych z ACK
         }
     }
 }

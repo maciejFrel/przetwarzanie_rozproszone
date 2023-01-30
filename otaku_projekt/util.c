@@ -18,6 +18,75 @@ MPI_Datatype MPI_PACKET_T;
 //     return "<unknown>";
 // }
 
+int maxFromPs(packet_t *otakuData)
+{
+    int max = -1;
+    for (int i = 0; i < size; i++)
+    {
+        if (max < otakuData[i].p)
+        {
+            max = otakuData[i].p;
+        }
+    }
+
+    return max;
+}
+
+int maxFromXs(packet_t *otakuData)
+{
+    int max = -1;
+    for (int i = 0; i < size; i++)
+    {
+        if (max < otakuData[i].x)
+        {
+            max = otakuData[i].x;
+        }
+    }
+
+    return max;
+}
+
+int countGreater(packet_t *otakuData)
+{
+    int count = 0;
+    for (int i = 0; i < size; i++)
+    {
+        if (i != rank)
+        {
+            if (otakuData[i].p > p)
+            {
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
+int countCuchyOfGreater(packet_t *otakuData)
+{
+    int cuchy = 0;
+    for (int i = 0; i < size; i++)
+    {
+        if (i != rank)
+        {
+            if (otakuData[i].p > p)
+            {
+                // debug("cuchy %d", otakuData[i].m);
+                cuchy += otakuData[i].m;
+            }
+        }
+    }
+
+    return cuchy;
+}
+
+void fillPs(packet_t *otakuData, int value)
+{
+    for (int i = 0; i < size; i++)
+    otakuData[i].p = value;
+}
+
 void initializePacketType()
 {
     int blocklengths[NITEMS] = {1, 1, 1};
@@ -45,7 +114,9 @@ void sendPacket(packet_t *packet, int destination, int tag)
     MPI_Send(packet, 1, MPI_PACKET_T, destination, tag, MPI_COMM_WORLD);
     // debug("Wysyłam %s do %d\n", tag2string(tag), destination);
     if (freePacket)
+    {
         free(packet);
+    }
 }
 
 void changeState(state_t newState)

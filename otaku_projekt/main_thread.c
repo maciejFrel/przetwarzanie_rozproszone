@@ -6,24 +6,31 @@ void mainLoop()
     srandom(rank);
     int tag;
 
-    // while (1)
-    // {
-    if (state == Out)
+    while (1)
     {
-        packet_t *packet = malloc(sizeof(packet_t));
-        packet->p = 0;
-        packet->m = 0;
-        packet->x = 0;
-        for (int i = 0; i < size; i++)
+        sleep((rand() % 4) + 1);
+        // debug("%lu %d", clock(), rand());
+        if (state == Out)
         {
-            if (i != rank)
+            // try to enter the room (send REQ to other otaku)
+            packet_t *packet = malloc(sizeof(packet_t));
+            packet->p = 0;
+            packet->m = 0;
+            packet->x = 0;
+            // debug("sending REQ");
+            for (int i = 0; i < size; i++)
             {
-                sendPacket(packet, i, Req);
+                if (i != rank)
+                {
+                    sendPacket(packet, i, Req);
+                }
             }
+        } else if (rand() % 100 < 20) {
+            // exit room
+            state = Out;
+            p = 0;
+            x = 0;
+            debug("---OUT---");
         }
     }
-
-    // sleep((rand() % 4) + 1);
-    // break;
-    // }
 }

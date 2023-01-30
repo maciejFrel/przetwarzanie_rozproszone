@@ -2,13 +2,15 @@
 #define UTILH
 #include "otaku.h"
 
-typedef enum {
+typedef enum
+{
     Req = 1,
     Ack,
     Release,
 } type_t;
 
-typedef struct {
+typedef struct
+{
     int p; // clock
     int m; // liczba cuchów otaku
     int x; // skumulowana liczba cuchów dla przedstawiciela
@@ -22,12 +24,17 @@ typedef enum
 
 #define NITEMS 3
 
-/* Typy wiadomości */
 #define APP_PKT 1
 #define FINISH 2
 
 extern MPI_Datatype MPI_PACKET_T;
 void initializePacketType();
-/* wysyłanie pakietu, skrót: wskaźnik do pakietu (0 oznacza stwórz pusty pakiet), do kogo, z jakim typem */
+
 void sendPacket(packet_t *pkt, int destination, int tag);
+int maxFromPs(packet_t *otakuData);
+int maxFromXs(packet_t *otakuData);
+int countGreater(packet_t *otakuData);
+int countCuchyOfGreater(packet_t *otakuData);
+void fillPs(packet_t *otakuData, int value);
+
 #endif
