@@ -5,11 +5,14 @@ void mainLoop()
 {
     srandom(rank);
     int tag;
+    long sleepTime = 1;
 
     while (1)
     {
-        sleep((rand() % 4) + 1);
-        // debug("%lu %d", clock(), rand());
+        sleepTime = (random() % 4) + 1.0;
+        debug("sleep time: %ld", sleepTime);
+        sleep(sleepTime);
+        // debug("EEEEEEE %lu %d %d", clock(), rand(), random());
         if (state == Out)
         {
             // try to enter the room (send REQ to other otaku)

@@ -62,9 +62,9 @@ void *startCommunicationThread(void *ptr)
 
         if (f) // ACK otrzymane od wszystkich pozostałych otaku
         {
-            // debug("I got all ACK");
+            debug("I got all ACK");
             int a = countGreater(otakuData);
-            debug("\tnumber of otaku in the room: %d", a);
+            debug("\tnumber of otaku in the room: %d, x: %d", a, x);
             if (a < S) // sprawdzanie czy jest miejsce w pomieszczeniu
             {
                 int b = countCuchyOfGreater(otakuData);

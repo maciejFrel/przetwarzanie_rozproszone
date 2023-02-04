@@ -53,6 +53,7 @@ int countGreater(packet_t *otakuData)
     {
         if (i != rank)
         {
+            debug("\t\totaku number: %d, P: %d", i, otakuData[i].p);
             if (otakuData[i].p > p)
             {
                 count++;
