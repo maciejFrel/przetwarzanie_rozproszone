@@ -17,7 +17,7 @@ void mainLoop()
             packet->p = 0;
             packet->m = 0;
             packet->x = 0;
-            // debug("sending REQ");
+            debug("\ttrying to get in");
             for (int i = 0; i < size; i++)
             {
                 if (i != rank)
