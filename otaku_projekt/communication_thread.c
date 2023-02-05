@@ -10,7 +10,6 @@ void *startCommunicationThread(void *ptr)
         otakuData[i].p = -1;
     }
     otakuData[rank].p = 0;
-    // debug("p: %d", otakuData[0]);
 
     MPI_Status status;
     packet_t packet;
@@ -43,6 +42,10 @@ void *startCommunicationThread(void *ptr)
         case Release:
             // debug("I got RELEASE from %d", status.MPI_SOURCE);
             x = 0;
+            for (int i = 0; i < size; i++)
+            {
+                otakuData[i].x = 0;
+            }
             break;
         }
 
@@ -66,36 +69,39 @@ void *startCommunicationThread(void *ptr)
             {
                 if (ADDITIONAL_LOGGING)
                     debug("\tI got all ACK");
+
                 int a = countHigherInQueue(otakuData);
+
                 if (ADDITIONAL_LOGGING)
                     debug("\tnumber of otakus higher in queue: %d, x: %d, p: %d", a, x, p);
+
                 if (a < S) // sprawdzanie czy jest miejsce w pomieszczeniu
                 {
                     int b = countCuchyOfGreater(otakuData);
-                    if (b < M) // sprawdzanie czy nie przekroczymy M
+                    if (b + m < M) // sprawdzanie czy nie przekroczymy M
                     {
-                        debug("IN\tcuchy: %d, równoczesne cuchy znajdujących sie powyzej w kolejce (M): %d", m, b);
                         // wejście do pomieszczenia
                         state = In;
                         m += rand() % 3 + 1;
                         p = maxFromPs(otakuData) + 1;
-                    } else {
-                        debug("ŚMIERDZE!!! (przekroczyłbym M)");
-                    }
-                }
-                else
-                {
-                    int c = maxFromXs(otakuData);
-                    if (c + m > X) // sprawdzanie czy trzeba zawiadomić kolejnego przedstawiciela
-                    {
-                        debug("asking for new representative (sending RELEASE)");
-                        for (int i = 0; i < size; i++)
+                        x = maxFromXs(otakuData) + m; // zapamiętanie kumulowanych cuchów
+                        debug("IN\tcuchy: %d, równoczesne cuchy znajdujących sie powyzej w kolejce + ja (M): %d, x: %d", m, b + m, x);
+
+                        if (x > X) // sprawdzanie czy trzeba zawiadomić kolejnego przedstawiciela
                         {
-                            if (i != rank)
+                            debug("asking for new representative (sending RELEASE)");
+                            for (int i = 0; i < size; i++)
                             {
-                                sendPacket(0, i, Release); // zawiadomienie nowego przedstawiciela
+                                if (i != rank)
+                                {
+                                    sendPacket(0, i, Release); // zawiadomienie nowego przedstawiciela
+                                }
                             }
                         }
+                    }
+                    else
+                    {
+                        debug("ŚMIERDZE!!! (przekroczyłbym M)");
                     }
                 }
                 fillPs(otakuData, -1); // wyzerowanie lokalnie przechowanych danych z ACK

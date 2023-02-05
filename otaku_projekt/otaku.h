@@ -19,7 +19,7 @@
 
 #define S 3
 #define M 20
-#define X 200
+#define X 50
 
 extern int rank;
 extern int size;
