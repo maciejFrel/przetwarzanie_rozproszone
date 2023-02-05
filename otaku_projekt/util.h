@@ -39,7 +39,7 @@ int maxFromPs(packet_t *otakuData);
 int maxFromXs(packet_t *otakuData);
 
 // count otakus that have P greater than mine
-int countGreater(packet_t *otakuData);
+int countHigherInQueue(packet_t *otakuData);
 
 // count cuchy of otakus that have P greater than mine
 int countCuchyOfGreater(packet_t *otakuData);

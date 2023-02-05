@@ -2,22 +2,6 @@
 #include "util.h"
 MPI_Datatype MPI_PACKET_T;
 
-// struct tagNames_t
-// {
-//     const char *name;
-//     int tag;
-// } tagNames[] = {{"pakiet aplikacyjny", APP_PKT}, {"finish", FINISH}};
-
-// const char const *tag2string(int tag)
-// {
-//     for (int i = 0; i < sizeof(tagNames) / sizeof(struct tagNames_t); i++)
-//     {
-//         if (tagNames[i].tag == tag)
-//             return tagNames[i].name;
-//     }
-//     return "<unknown>";
-// }
-
 int maxFromPs(packet_t *otakuData)
 {
     int max = -1;
@@ -46,15 +30,20 @@ int maxFromXs(packet_t *otakuData)
     return max;
 }
 
-int countGreater(packet_t *otakuData)
+int countHigherInQueue(packet_t *otakuData)
 {
     int count = 0;
     for (int i = 0; i < size; i++)
     {
         if (i != rank)
         {
-            debug("\t\totaku number: %d, P: %d", i, otakuData[i].p);
+            if (ADDITIONAL_LOGGING)
+                debug("\totaku number: %d, P: %d", i, otakuData[i].p);
             if (otakuData[i].p > p)
+            {
+                count++;
+            }
+            else if (otakuData[i].p == p && i < rank)
             {
                 count++;
             }
@@ -73,7 +62,6 @@ int countCuchyOfGreater(packet_t *otakuData)
         {
             if (otakuData[i].p > p)
             {
-                // debug("cuchy %d", otakuData[i].m);
                 cuchy += otakuData[i].m;
             }
         }
@@ -85,7 +73,7 @@ int countCuchyOfGreater(packet_t *otakuData)
 void fillPs(packet_t *otakuData, int value)
 {
     for (int i = 0; i < size; i++)
-    otakuData[i].p = value;
+        otakuData[i].p = value;
 }
 
 void initializePacketType()
@@ -111,9 +99,7 @@ void sendPacket(packet_t *packet, int destination, int tag)
         packet = malloc(sizeof(packet_t));
         freePacket = 1;
     }
-    // packet->type = rank;
     MPI_Send(packet, 1, MPI_PACKET_T, destination, tag, MPI_COMM_WORLD);
-    // debug("Wysyłam %s do %d\n", tag2string(tag), destination);
     if (freePacket)
     {
         free(packet);

@@ -24,15 +24,15 @@ void *startCommunicationThread(void *ptr)
         switch (status.MPI_TAG)
         {
         case Req:
-            {
-                // debug("I got REQ from %d", status.MPI_SOURCE);
-                packet_t *pkt = malloc(sizeof(packet_t));
-                pkt->m = m;
-                pkt->p = p;
-                pkt->x = x;
-                sendPacket(pkt, status.MPI_SOURCE, Ack);
-                break;
-            }
+        {
+            // debug("I got REQ from %d", status.MPI_SOURCE);
+            packet_t *pkt = malloc(sizeof(packet_t));
+            pkt->m = m;
+            pkt->p = p;
+            pkt->x = x;
+            sendPacket(pkt, status.MPI_SOURCE, Ack);
+            break;
+        }
         case Ack:
             // debug("p: %d", otakuData[0].p);
             // debug("I got ACK from %d (m: %d, p: %d, x: %d)", status.MPI_SOURCE, packet.m, packet.p, packet.x);
@@ -60,26 +60,35 @@ void *startCommunicationThread(void *ptr)
             }
         }
 
-        if (f) // ACK otrzymane od wszystkich pozostałych otaku
+        if (f)
         {
-            debug("I got all ACK");
-            int a = countGreater(otakuData);
-            debug("\tnumber of otaku in the room: %d, x: %d", a, x);
-            if (a < S) // sprawdzanie czy jest miejsce w pomieszczeniu
+            if (state == Out) // ACK otrzymane od wszystkich pozostałych otaku
             {
-                int b = countCuchyOfGreater(otakuData);
-                // debug("b %d", b);
-                if (b < M) // sprawdzanie czy nie przekroczymy M
+                if (ADDITIONAL_LOGGING)
+                    debug("\tI got all ACK");
+                int a = countHigherInQueue(otakuData);
+                if (ADDITIONAL_LOGGING)
+                    debug("\tnumber of otakus higher in queue: %d, x: %d, p: %d", a, x, p);
+                if (a < S) // sprawdzanie czy jest miejsce w pomieszczeniu
                 {
-                    debug("---IN---");
-                    // wejście do pomieszczenia
-                    state = In;
-                    m += rand() % 3 + 1;
-                    p = maxFromPs(otakuData) + 1;
-                    // debug("p %d", p);
+                    int b = countCuchyOfGreater(otakuData);
+                    if (b < M) // sprawdzanie czy nie przekroczymy M
+                    {
+                        debug("IN\tcuchy: %d, równoczesne cuchy znajdujących sie powyzej w kolejce (M): %d", m, b);
+                        // wejście do pomieszczenia
+                        state = In;
+                        m += rand() % 3 + 1;
+                        p = maxFromPs(otakuData) + 1;
+                    } else {
+                        debug("ŚMIERDZE!!! (przekroczyłbym M)");
+                    }
+                }
+                else
+                {
                     int c = maxFromXs(otakuData);
                     if (c + m > X) // sprawdzanie czy trzeba zawiadomić kolejnego przedstawiciela
                     {
+                        debug("asking for new representative (sending RELEASE)");
                         for (int i = 0; i < size; i++)
                         {
                             if (i != rank)
@@ -89,8 +98,8 @@ void *startCommunicationThread(void *ptr)
                         }
                     }
                 }
+                fillPs(otakuData, -1); // wyzerowanie lokalnie przechowanych danych z ACK
             }
-            fillPs(otakuData, -1); // wyzerowanie lokalnie przechowanych danych z ACK
         }
     }
 }

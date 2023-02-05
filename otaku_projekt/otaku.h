@@ -15,11 +15,11 @@
 #define SEC_IN_STATE 1
 #define STATE_CHANGE_PROB 10
 
+#define ADDITIONAL_LOGGING 0
+
 #define S 3
 #define M 20
 #define X 200
-
-#define ROOT 0
 
 extern int rank;
 extern int size;

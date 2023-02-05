@@ -4,15 +4,10 @@
 void mainLoop()
 {
     srandom(rank);
-    int tag;
     long sleepTime = 1;
 
     while (1)
     {
-        sleepTime = (random() % 4) + 1.0;
-        debug("sleep time: %ld", sleepTime);
-        sleep(sleepTime);
-        // debug("EEEEEEE %lu %d %d", clock(), rand(), random());
         if (state == Out)
         {
             // try to enter the room (send REQ to other otaku)
@@ -20,7 +15,12 @@ void mainLoop()
             packet->p = 0;
             packet->m = 0;
             packet->x = 0;
-            debug("\ttrying to get in");
+            
+            // setting P to 1 to differentiate from 0 which is otaku that is not requesting to enter the room
+            p = 1;
+            
+            debug("trying to get in (sending REQ)");
+            
             for (int i = 0; i < size; i++)
             {
                 if (i != rank)
@@ -28,12 +28,15 @@ void mainLoop()
                     sendPacket(packet, i, Req);
                 }
             }
-        } else if (rand() % 100 < 20) {
+        }
+        else if (state == In && random() % 100 < 30)
+        {
             // exit room
             state = Out;
             p = 0;
             x = 0;
-            debug("---OUT---");
+            debug("OUT");
         }
+        sleep(SEC_IN_STATE);
     }
 }
