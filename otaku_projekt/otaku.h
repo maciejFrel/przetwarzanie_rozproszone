@@ -18,7 +18,7 @@
 #define ADDITIONAL_LOGGING 0
 
 #define S 3
-#define M 20
+#define M 70
 #define X 50
 
 extern int rank;
